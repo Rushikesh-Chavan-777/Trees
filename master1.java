@@ -91,14 +91,7 @@ public class master1 {
             }
         }
     }
-    //inorder traversal using an iterative approach
-    // the diea here is basically to create the recurssion stack as an actual stack and leverage that for an iterative way
-    public static void inorder(Node root) {
-        if(root == null) {
-            return;
-        }
-        Stack<Node> 
-    }
+
 
 
 
