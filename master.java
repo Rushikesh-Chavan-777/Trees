@@ -8,6 +8,8 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.TreeMap;
 
+import javax.swing.tree.TreeNode;
+
 class Node {
     int data;
     Node left;
@@ -662,144 +664,203 @@ public class master {
         return ans;
     }
 
-
-public static void getparents(Node root, Map<Node, Node> mapper) {
-    Queue<Node> q = new LinkedList<>();
-    q.offer(root);
-    while (!q.isEmpty()) {
-        Node noder = q.poll();
-        if (noder.left != null) {
-            q.offer(noder.left);
-            mapper.put(noder.left, noder);
-        }
-        if (noder.right != null) {
-            q.offer(noder.right);
-            mapper.put(noder.right, noder);
-        }
-    }
-}
-
-public static int burntree(Node root, Node ref) {
-    Map<Node, Node> parent_map = new HashMap<>();
-    getparents(root, parent_map);
-
-    Map<Node, Boolean> visited = new HashMap<>();
-    Queue<Node> q = new LinkedList<>();
-
-    q.offer(ref);
-    visited.put(ref, true);
-
-    int time = 0;
-
-    while (!q.isEmpty()) {
-        int size = q.size();
-        boolean anyNewFire = false;
-
-        for (int i = 0; i < size; i++) {
-            Node curr = q.poll();
-
-            // Spread to left child
-            if (curr.left != null && !visited.containsKey(curr.left)) {
-                visited.put(curr.left, true);
-                q.offer(curr.left);
-                anyNewFire = true;
+    public static void getparents(Node root, Map<Node, Node> mapper) {
+        Queue<Node> q = new LinkedList<>();
+        q.offer(root);
+        while (!q.isEmpty()) {
+            Node noder = q.poll();
+            if (noder.left != null) {
+                q.offer(noder.left);
+                mapper.put(noder.left, noder);
             }
-
-            // Spread to right child
-            if (curr.right != null && !visited.containsKey(curr.right)) {
-                visited.put(curr.right, true);
-                q.offer(curr.right);
-                anyNewFire = true;
-            }
-
-            // Spread to parent
-            Node parent = parent_map.get(curr);
-            if (parent != null && !visited.containsKey(parent)) {
-                visited.put(parent, true);
-                q.offer(parent);
-                anyNewFire = true;
+            if (noder.right != null) {
+                q.offer(noder.right);
+                mapper.put(noder.right, noder);
             }
         }
+    }
 
-        if (anyNewFire) {
-            time++; // only increment time if fire spread in this round
+    public static int burntree(Node root, Node ref) {
+        Map<Node, Node> parent_map = new HashMap<>();
+        getparents(root, parent_map);
+
+        Map<Node, Boolean> visited = new HashMap<>();
+        Queue<Node> q = new LinkedList<>();
+
+        q.offer(ref);
+        visited.put(ref, true);
+
+        int time = 0;
+
+        while (!q.isEmpty()) {
+            int size = q.size();
+            boolean anyNewFire = false;
+
+            for (int i = 0; i < size; i++) {
+                Node curr = q.poll();
+
+                // Spread to left child
+                if (curr.left != null && !visited.containsKey(curr.left)) {
+                    visited.put(curr.left, true);
+                    q.offer(curr.left);
+                    anyNewFire = true;
+                }
+
+                // Spread to right child
+                if (curr.right != null && !visited.containsKey(curr.right)) {
+                    visited.put(curr.right, true);
+                    q.offer(curr.right);
+                    anyNewFire = true;
+                }
+
+                // Spread to parent
+                Node parent = parent_map.get(curr);
+                if (parent != null && !visited.containsKey(parent)) {
+                    visited.put(parent, true);
+                    q.offer(parent);
+                    anyNewFire = true;
+                }
+            }
+
+            if (anyNewFire) {
+                time++; // only increment time if fire spread in this round
+            }
         }
-    }
-  
-    return time;
-}
 
-
-//creating a tree when we are given post and in order traversals
-public static Node buildpostin(int[] postorder, int[] inorder) {
-    //we shall creater a helper fuction to this
-    //but, first lets create a map to apropriately get positions in the inorder arary
-    Map<Integer, Integer> inMap = new HashMap<>();
-    for(int i = 0; i < inorder.length; i++) {
-        inMap.put(inorder[i], i);
+        return time;
     }
 
-    Node root = buildpostinHelper(postorder, 0, postorder.length-1, inorder, 0, inorder.length-1, inMap);
+    // creating a tree when we are given post and in order traversals
+    public static Node buildpostin(int[] postorder, int[] inorder) {
+        // we shall creater a helper fuction to this
+        // but, first lets create a map to apropriately get positions in the inorder
+        // arary
+        Map<Integer, Integer> inMap = new HashMap<>();
+        for (int i = 0; i < inorder.length; i++) {
+            inMap.put(inorder[i], i);
+        }
 
-    return root;
-}
+        Node root = buildpostinHelper(postorder, 0, postorder.length - 1, inorder, 0, inorder.length - 1, inMap);
 
-public static Node buildpostinHelper(int[] postorder, int post_start, int post_end, int[] in, int in_start, int in_stop, Map<Integer, Integer> inMap) {
-    //here we shall write the ending condition(at the end of the recirsuion stack condition) > 
-    if(post_start> post_end || in_start > in_stop) return null;
-
-    Node root = new Node(postorder[post_end]);
-    int in_index = inMap.get(root.data);
-    int to_left = in_index - in_start;
-
-    root.left = buildpostinHelper(postorder, post_start, post_start + to_left - 1, in, in_start, in_index-1, inMap);
-    root.right = buildpostinHelper(postorder, post_start + to_left, post_end - 1, in, in_index+1, in_stop, inMap);
-    return root;
-}
-
-
-
-
-
-// buildinga  tree when pre and inorder are given 
-public static Node buildprein(int[] preorder, int[] inorder) {
-    Map<Integer, Integer> inMap = new HashMap<>();
-    for (int i = 0; i < inorder.length; i++) {
-        inMap.put(inorder[i], i);
+        return root;
     }
 
-    return buildpreinHelper(preorder, 0, preorder.length - 1, inorder, 0, inorder.length - 1, inMap);
+    public static Node buildpostinHelper(int[] postorder, int post_start, int post_end, int[] in, int in_start,
+            int in_stop, Map<Integer, Integer> inMap) {
+        // here we shall write the ending condition(at the end of the recirsuion stack
+        // condition) >
+        if (post_start > post_end || in_start > in_stop)
+            return null;
+
+        Node root = new Node(postorder[post_end]);
+        int in_index = inMap.get(root.data);
+        int to_left = in_index - in_start;
+
+        root.left = buildpostinHelper(postorder, post_start, post_start + to_left - 1, in, in_start, in_index - 1,
+                inMap);
+        root.right = buildpostinHelper(postorder, post_start + to_left, post_end - 1, in, in_index + 1, in_stop, inMap);
+        return root;
+    }
+
+    // buildinga tree when pre and inorder are given
+    public static Node buildprein(int[] preorder, int[] inorder) {
+        Map<Integer, Integer> inMap = new HashMap<>();
+        for (int i = 0; i < inorder.length; i++) {
+            inMap.put(inorder[i], i);
+        }
+
+        return buildpreinHelper(preorder, 0, preorder.length - 1, inorder, 0, inorder.length - 1, inMap);
+    }
+
+    public static Node buildpreinHelper(int[] preorder, int pre_start, int pre_end, int[] inorder, int in_start,
+            int in_end, Map<Integer, Integer> inMap) {
+        if (pre_start > pre_end || in_start > in_end)
+            return null;
+
+        Node root = new Node(preorder[pre_start]); // root is at the start of preorder
+        int in_index = inMap.get(root.data);
+        int left_tree_size = in_index - in_start;
+
+        root.left = buildpreinHelper(
+                preorder,
+                pre_start + 1,
+                pre_start + left_tree_size,
+                inorder,
+                in_start,
+                in_index - 1,
+                inMap);
+
+        root.right = buildpreinHelper(
+                preorder,
+                pre_start + left_tree_size + 1,
+                pre_end,
+                inorder,
+                in_index + 1,
+                in_end,
+                inMap);
+
+        return root;
+    }
+
+    // This function searches for a node with
+    // a specified value in a Binary Search Tree (BST).
+    public Node searchBST(Node root, int val) {
+        // Loop until either the tree is
+        // exhausted (null) or the value is found.
+        while (root != null && root.data != val) {
+            // Check if the target value is
+            // less than the current node's value.
+            // If so, move to the left subtree
+            // (values smaller than the current node).
+            // Otherwise, move to the right subtree
+            // (values larger than the current node).
+            root = val < root.data ? root.left : root.right;
+        }
+        // Return the node containing the target value,
+        // if found; otherwise, return null.
+        return root;
+    }
+
+
+       public int findCeil(Node root, int key) {
+        int ceil = -1;
+        while (root != null) {
+            if (root.data == key) {
+                ceil = root.data;
+                return ceil;
+            }
+            if (key > root.data) {
+                root = root.right;
+            } else {
+                ceil = root.data;
+                root = root.left;
+            }
+        }
+        return ceil;
+    }
+
+
+    public class floorbst {
+     public int floorInBST(Node root, int key) {
+        int floor = -1;
+        while (root != null) {
+            if (root.data == key) {
+                floor = root.data;
+                return floor;
+            }
+            if (key > root.data) {
+                floor = root.data;
+                root = root.right;
+            } else {
+                root = root.left;
+            }
+        }
+        return floor;
+    }
+    
 }
 
-public static Node buildpreinHelper(int[] preorder, int pre_start, int pre_end,int[] inorder, int in_start, int in_end,Map<Integer, Integer> inMap) {
-    if (pre_start > pre_end || in_start > in_end) return null;
 
-    Node root = new Node(preorder[pre_start]);  // root is at the start of preorder
-    int in_index = inMap.get(root.data);
-    int left_tree_size = in_index - in_start;
-
-    root.left = buildpreinHelper(
-        preorder,
-        pre_start + 1,
-        pre_start + left_tree_size,
-        inorder,
-        in_start,
-        in_index - 1,
-        inMap
-    );
-
-    root.right = buildpreinHelper(
-        preorder,
-        pre_start + left_tree_size + 1,
-        pre_end,
-        inorder,
-        in_index + 1,
-        in_end,
-        inMap
-    );
-
-    return root;
-}
 
 
 
